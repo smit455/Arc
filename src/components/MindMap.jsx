@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ReactFlow, { Handle, Background } from "reactflow";
+import ReactFlow, { Handle, Background, Controls } from "reactflow";
 import "reactflow/dist/style.css";
 
 const MindMapNode = ({ data }) => (
@@ -10,7 +10,7 @@ const MindMapNode = ({ data }) => (
       borderRadius: 5,
       background: "#f4f4f4",
       textAlign: "center",
-      width: 180, 
+      width: 180,
       boxShadow: "2px 2px 10px rgba(0,0,0,0.1)",
     }}
   >
@@ -24,6 +24,7 @@ const MindMapNode = ({ data }) => (
 const MindMap = () => {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
+  const [viewport, setViewport] = useState({ x: 0, y: 0, zoom: 1 });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,18 +33,18 @@ const MindMap = () => {
 
       const rootNode = {
         id: "root",
-        type: "customNode", 
+        type: "customNode",
         data: { label: "Users" },
-        position: { x: 400, y: 50 }, 
+        position: { x: 400, y: 50 },
       };
 
       const userNodes = data.map((user, index) => ({
         id: user.id.toString(),
-        type: "customNode", 
+        type: "customNode",
         data: { label: user.name, email: user.email },
         position: {
           x: 250 * (index % 4),
-          y: 150 + Math.floor(index / 4) * 150, 
+          y: 150 + Math.floor(index / 4) * 150,
         },
       }));
 
@@ -61,15 +62,38 @@ const MindMap = () => {
   }, []);
 
   const nodeTypes = { customNode: MindMapNode };
- 
+
+  const handleViewportChange = (newViewport) => {
+    if (newViewport) {
+      setViewport((prev) => ({
+        ...prev,
+        y: newViewport.y,
+        zoom: newViewport.zoom,
+      }));
+    }
+  };
+
+  // Move the viewport left by decreasing the x value
+
+
   return (
     <div style={{ width: "100%", height: "600px", border: "1px solid #ccc" }}>
-      <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} fitView >
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        fitView
+        zoomOnScroll={true}
+        panOnDrag={true}
+        zoomOnPinch={true}
+        onMove={handleViewportChange}
+        viewport={viewport}
+      >
         <Background variant="dots" gap={16} size={1} color="#ddd" />
+        <Controls />
       </ReactFlow>
     </div>
   );
 };
-
 
 export default MindMap;
